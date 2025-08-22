@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-card h3 {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #c0c0c0;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #c0c0c0;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff8c00, #ff6347);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-description {
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+
+        .transaction-category {
+            font-size: 0.9rem;
+            color: #ffd700;
+        }
+
+        .transaction-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dashboard-section {
+            grid-column: 1 / -1;
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .save-load-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Controle Financeiro</h1>
+        </div>
+
+        <!-- Resumo Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>DESPESAS</h3>
+                <div class="value" id="totalDespesas">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+                <h3>RECEITAS</h3>
+                <div class="value" id="totalReceitas">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+                <h3>SALDO</h3>
+                <div class="value" id="saldo">R$ 0,00</div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <!-- Quadro Despesas -->
+            <div class="glass-card">
+                <h2 class="section-title">📉 DESPESAS</h2>
+                <form id="despesaForm">
+                    <div class="form-group">
+                        <label for="despesaDescricao">Descrição:</label>
+                        <input type="text" id="despesaDescricao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="despesaValor">Valor:</label>
+                        <input type="number" id="despesaValor" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="despesaCategoria">Categoria:</label>
+                        <select id="despesaCategoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Moradia">Moradia</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Educação">Educação</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="despesaData">Data:</label>
+                        <input type="date" id="despesaData" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar Despesa</button>
+                    <button type="button" class="btn btn-secondary" id="cancelarDespesa" style="display: none;">Cancelar</button>
+                </form>
+                
+                <div class="transaction-list" id="listaDespesas"></div>
+            </div>
+
+            <!-- Quadro Receitas -->
+            <div class="glass-card">
+                <h2 class="section-title">📈 RECEITAS</h2>
+                <form id="receitaForm">
+                    <div class="form-group">
+                        <label for="receitaDescricao">Descrição:</label>
+                        <input type="text" id="receitaDescricao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receitaValor">Valor:</label>
+                        <input type="number" id="receitaValor" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receitaCategoria">Categoria:</label>
+                        <select id="receitaCategoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="Salário">Salário</option>
+                            <option value="Freelance">Freelance</option>
+                            <option value="Investimentos">Investimentos</option>
+                            <option value="Vendas">Vendas</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="receitaData">Data:</label>
+                        <input type="date" id="receitaData" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar Receita</button>
+                    <button type="button" class="btn btn-secondary" id="cancelarReceita" style="display: none;">Cancelar</button>
+                </form>
+                
+                <div class="transaction-list" id="listaReceitas"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="glass-card dashboard-section">
+            <h2 class="section-title">📊 DASHBOARD</h2>
+            <div class="dashboard-content">
+                <div class="chart-container">
+                    <canvas id="chartDonut"></canvas>
+                </div>
+                <div class="glass-card">
+                    <h3 class="section-title">📋 RESUMO</h3>
+                    <div class="filter-section">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="filtroDataInicio">Data Início:</label>
+                            <input type="date" id="filtroDataInicio">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="filtroDataFim">Data Fim:</label>
+                            <input type="date" id="filtroDataFim">
+                        </div>
+                        <button class="btn btn-primary" onclick="aplicarFiltro()">Filtrar</button>
+                        <button class="btn btn-secondary" onclick="limparFiltro()">Limpar</button>
+                    </div>
+                    <div id="resumoFiltrado"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões Salvar/Carregar -->
+        <div class="save-load-section">
+            <button class="btn btn-primary" onclick="salvarDados()">💾 Salvar Dados</button>
+            <button class="btn btn-secondary" onclick="carregarDados()">📂 Carregar Dados</button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="lerArquivo(event)">
+        </div>
+    </div>
+
+    <script>
+        // Dados globais
+        let despesas = [];
+        let receitas = [];
+        let editandoDespesa = null;
+        let editandoReceita = null;
+        let chart = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir data atual como padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('despesaData').value = hoje;
+            document.getElementById('receitaData').value = hoje;
+            
+            // Event listeners
+            document.getElementById('despesaForm').addEventListener('submit', adicionarDespesa);
+            document.getElementById('receitaForm').addEventListener('submit', adicionarReceita);
+            document.getElementById('cancelarDespesa').addEventListener('click', cancelarEdicaoDespesa);
+            document.getElementById('cancelarReceita').addEventListener('click', cancelarEdicaoReceita);
+            
+            // Inicializar gráfico
+            inicializarGrafico();
+            atualizarResumo();
+        });
+
+        // Funções de Despesas
+        function adicionarDespesa(e) {
+            e.preventDefault();
+            
+            const descricao = document.getElementById('despesaDescricao').value;
+            const valor = parseFloat(document.getElementById('despesaValor').value);
+            const categoria = document.getElementById('despesaCategoria').value;
+            const data = document.getElementById('despesaData').value;
+            
+            const despesa = {
+                id: editandoDespesa ? editandoDespesa.id : Date.now(),
+                descricao,
+                valor,
+                categoria,
+                data
+            };
+            
+            if (editandoDespesa) {
+                const index = despesas.findIndex(d => d.id === editandoDespesa.id);
+                despesas[index] = despesa;
+                editandoDespesa = null;
+                document.getElementById('cancelarDespesa').style.display = 'none';
+            } else {
+                despesas.push(despesa);
+            }
+            
+            document.getElementById('despesaForm').reset();
+            document.getElementById('despesaData').value = new Date().toISOString().split('T')[0];
+            
+            atualizarListaDespesas();
+            atualizarResumo();
+            atualizarGrafico();
+        }
+
+        function editarDespesa(id) {
+            const despesa = despesas.find(d => d.id === id);
+            if (despesa) {
+                document.getElementById('despesaDescricao').value = despesa.descricao;
+                document.getElementById('despesaValor').value = despesa.valor;
+                document.getElementById('despesaCategoria').value = despesa.categoria;
+                document.getElementById('despesaData').value = despesa.data;
+                
+                editandoDespesa = despesa;
+                document.getElementById('cancelarDespesa').style.display = 'inline-block';
+            }
+        }
+
+        function excluirDespesa(id) {
+            if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                despesas = despesas.filter(d => d.id !== id);
+                atualizarListaDespesas();
+                atualizarResumo();
+                atualizarGrafico();
+            }
+        }
+
+        function cancelarEdicaoDespesa() {
+            editandoDespesa = null;
+            document.getElementById('despesaForm').reset();
+            document.getElementById('despesaData').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cancelarDespesa').style.display = 'none';
+        }
+
+        function atualizarListaDespesas() {
+            const lista = document.getElementById('listaDespesas');
+            lista.innerHTML = '';
+            
+            despesas.forEach(despesa => {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                item.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${despesa.descricao}</div>
+                        <div class="transaction-category">${despesa.categoria} - ${formatarData(despesa.data)}</div>
+                    </div>
+                    <div class="transaction-value" style="color: #ff6b6b;">-R$ ${despesa.valor.toFixed(2)}</div>
+                    <div class="transaction-actions">
+                        <button class="btn btn-secondary" onclick="editarDespesa(${despesa.id})" style="padding: 8px 12px; font-size: 0.8rem;">Editar</button>
+                        <button class="btn btn-danger" onclick="excluirDespesa(${despesa.id})" style="padding: 8px 12px; font-size: 0.8rem;">Excluir</button>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Funções de Receitas
+        function adicionarReceita(e) {
+            e.preventDefault();
+            
+            const descricao = document.getElementById('receitaDescricao').value;
+            const valor = parseFloat(document.getElementById('receitaValor').value);
+            const categoria = document.getElementById('receitaCategoria').value;
+            const data = document.getElementById('receitaData').value;
+            
+            const receita = {
+                id: editandoReceita ? editandoReceita.id : Date.now(),
+                descricao,
+                valor,
+                categoria,
+                data
+            };
+            
+            if (editandoReceita) {
+                const index = receitas.findIndex(r => r.id === editandoReceita.id);
+                receitas[index] = receita;
+                editandoReceita = null;
+                document.getElementById('cancelarReceita').style.display = 'none';
+            } else {
+                receitas.push(receita);
+            }
+            
+            document.getElementById('receitaForm').reset();
+            document.getElementById('receitaData').value = new Date().toISOString().split('T')[0];
+            
+            atualizarListaReceitas();
+            atualizarResumo();
+            atualizarGrafico();
+        }
+
+        function editarReceita(id) {
+            const receita = receitas.find(r => r.id === id);
+            if (receita) {
+                document.getElementById('receitaDescricao').value = receita.descricao;
+                document.getElementById('receitaValor').value = receita.valor;
+                document.getElementById('receitaCategoria').value = receita.categoria;
+                document.getElementById('receitaData').value = receita.data;
+                
+                editandoReceita = receita;
+                document.getElementById('cancelarReceita').style.display = 'inline-block';
+            }
+        }
+
+        function excluirReceita(id) {
+            if (confirm('Tem certeza que deseja excluir esta receita?')) {
+                receitas = receitas.filter(r => r.id !== id);
+                atualizarListaReceitas();
+                atualizarResumo();
+                atualizarGrafico();
+            }
+        }
+
+        function cancelarEdicaoReceita() {
+            editandoReceita = null;
+            document.getElementById('receitaForm').reset();
+            document.getElementById('receitaData').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cancelarReceita').style.display = 'none';
+        }
+
+        function atualizarListaReceitas() {
+            const lista = document.getElementById('listaReceitas');
+            lista.innerHTML = '';
+            
+            receitas.forEach(receita => {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                item.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${receita.descricao}</div>
+                        <div class="transaction-category">${receita.categoria} - ${formatarData(receita.data)}</div>
+                    </div>
+                    <div class="transaction-value" style="color: #51cf66;">+R$ ${receita.valor.toFixed(2)}</div>
+                    <div class="transaction-actions">
+                        <button class="btn btn-secondary" onclick="editarReceita(${receita.id})" style="padding: 8px 12px; font-size: 0.8rem;">Editar</button>
+                        <button class="btn btn-danger" onclick="excluirReceita(${receita.id})" style="padding: 8px 12px; font-size: 0.8rem;">Excluir</button>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Funções de Resumo
+        function atualizarResumo() {
+            const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
+            const totalReceitas = receitas.reduce((total, receita) => total + receita.valor, 0);
+            const saldo = totalReceitas - totalDespesas;
+            
+            document.getElementById('totalDespesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
+            document.getElementById('totalReceitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
+            document.getElementById('saldo').textContent = `R$ ${saldo.toFixed(2)}`;
+            
+            // Colorir saldo
+            const saldoElement = document.getElementById('saldo');
+            if (saldo > 0) {
+                saldoElement.style.color = '#51cf66';
+            } else if (saldo < 0) {
+                saldoElement.style.color = '#ff6b6b';
+            } else {
+                saldoElement.style.color = '#c0c0c0';
+            }
+        }
+
+        // Funções de Gráfico
+        function inicializarGrafico() {
+            const ctx = document.getElementById('chartDonut').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receitas', 'Despesas'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(81, 207, 102, 0.8)',
+                            'rgba(255, 107, 107, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(81, 207, 102, 1)',
+                            'rgba(255, 107, 107, 1)'
+                        ],
+                        borderWidth: 3,
+                        spacing: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: 'Ubuntu',
+                                    size: 14,
+                                    weight: '600'
+                                },
+                                padding: 20
+                            }
+                        }
+                    },
+                    elements: {
+                        arc: {
+                            borderRadius: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function atualizarGrafico() {
+            const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
+            const totalReceitas = receitas.reduce((total, receita) => total + receita.valor, 0);
+            
+            chart.data.datasets[0].data = [totalReceitas, totalDespesas];
+            chart.update();
+        }
+
+        // Funções de Filtro
+        function aplicarFiltro() {
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+            
+            let despesasFiltradas = despesas;
+            let receitasFiltradas = receitas;
+            
+            if (dataInicio) {
+                despesasFiltradas = despesasFiltradas.filter(d => d.data >= dataInicio);
+                receitasFiltradas = receitasFiltradas.filter(r => r.data >= dataInicio);
+            }
+            
+            if (dataFim) {
+                despesasFiltradas = despesasFiltradas.filter(d => d.data <= dataFim);
+                receitasFiltradas = receitasFiltradas.filter(r => r.data <= dataFim);
+            }
+            
+            const totalDespesasFiltradas = despesasFiltradas.reduce((total, despesa) => total + despesa.valor, 0);
+            const totalReceitasFiltradas = receitasFiltradas.reduce((total, receita) => total + receita.valor, 0);
+            const saldoFiltrado = totalReceitasFiltradas - totalDespesasFiltradas;
+            
+            const resumo = document.getElementById('resumoFiltrado');
+            resumo.innerHTML = `
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                    <h4 style="color: #ffd700; margin-bottom: 10px;">Período Filtrado:</h4>
+                    <p><strong>Receitas:</strong> <span style="color: #51cf66;">R$ ${totalReceitasFiltradas.toFixed(2)}</span></p>
+                    <p><strong>Despesas:</strong> <span style="color: #ff6b6b;">R$ ${totalDespesasFiltradas.toFixed(2)}</span></p>
+                    <p><strong>Saldo:</strong> <span style="color: ${saldoFiltrado >= 0 ? '#51cf66' : '#ff6b6b'};">R$ ${saldoFiltrado.toFixed(2)}</span></p>
+                </div>
+            `;
+        }
+
+        function limparFiltro() {
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            document.getElementById('resumoFiltrado').innerHTML = '';
+        }
+
+        // Funções de Salvar/Carregar
+        function salvarDados() {
+            const dados = {
+                despesas: despesas,
+                receitas: receitas,
+                dataExportacao: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(dados, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `controle-financeiro-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        function carregarDados() {
+            document.getElementById('fileInput').click();
+        }
+
+        function lerArquivo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        
+                        if (dados.despesas && dados.receitas) {
+                            despesas = dados.despesas;
+                            receitas = dados.receitas;
+                            
+                            atualizarListaDespesas();
+                            atualizarListaReceitas();
+                            atualizarResumo();
+                            atualizarGrafico();
+                            
+                            alert('Dados carregados com sucesso!');
+                        } else {
+                            alert('Arquivo JSON inválido!');
+                        }
+                    } catch (error) {
+                        alert('Erro ao ler o arquivo: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Funções auxiliares
+        function formatarData(data) {
+            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+    </script>
+</body>
+</html>
+
